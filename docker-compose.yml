@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: django-docker
+    command: gunicorn app.wsgi:application --bind 0.0.0.0:8000
+    env_file: .env
+    ports:
+      - "8000:8000"
+    restart: always
+
+  migrate:
+    build: .
+    container_name: django-migrate
+    command: python manage.py migrate
+    env_file: .env
+    restart: "no"
+    depends_on:
+      - web
