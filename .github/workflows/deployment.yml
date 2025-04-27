@@ -27,5 +27,5 @@ jobs:
           sudo docker stop django-docker || true
           sudo docker rm django-docker || true
           sudo docker build -t django-docker .
-          sudo docker run -d --env-file .env -p 8000:8000 --name django-docker django-docker
+          sudo docker run -d --restart-always --env-file .env -p 8000:8000 --name django-docker django-docker
         EOF
