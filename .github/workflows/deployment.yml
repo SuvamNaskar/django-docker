@@ -1,0 +1,32 @@
+name: Django CI/CD to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up SSH
+      uses: webfactory/ssh-agent@v0.9.0
+      with:
+        ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+
+    - name: Deploy to EC2
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+          cd /home/ubuntu/django-docker || git clone https://github.com/yourusername/your-repo.git django-docker
+          cd django-docker
+          git pull origin main
+          echo "${{ secrets.ENV_FILE }}" > .env
+          docker stop django-docker || true
+          docker rm django-docker || true
+          docker build -t django-docker .
+          docker run -d --env-file .env -p 8000:8000 --name django-docker django-docker
+        EOF
